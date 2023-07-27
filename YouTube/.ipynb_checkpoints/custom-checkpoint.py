@@ -4,12 +4,6 @@
 # In[1]:
 
 
-import re
-
-
-# In[2]:
-
-
 def extract_key_from_json(json_data, target_key):
     result = []
 
@@ -26,19 +20,6 @@ def extract_key_from_json(json_data, target_key):
 
     search_nested(json_data, target_key)
     return result
-
-
-# In[3]:
-
-
-def clean_string(input_string):
-    # Define the regular expression pattern to match unwanted characters
-    pattern = r'[^a-zA-Z_,\s]'
-    
-    # Use re.sub() to replace unwanted characters with an empty string
-    cleaned_string = re.sub(pattern, '', input_string)
-    
-    return cleaned_string
 
 
 # In[ ]:
