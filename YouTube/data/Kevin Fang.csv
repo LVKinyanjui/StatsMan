@@ -1,17 +1,17 @@
-video_titles
-"Cloudflare Deploys Really Slow Code, Takes Down Internet"
-How GitHub's Database Self-Destructed in 43 Seconds
-The Worst Website Launch of All Time
-"Dev Deletes Entire Production Database, Chaos Ensues"
-Capital One's $200M Cloud Data Breach
-How This SQL Command Blew Up a Billion Dollar Company
-How One Line of Code Almost Blew Up the Internet
-Can ChatGPT solve the world's hardest puzzles?
-Real day in the life of a Twitter software engineer
-Software Engineer Interview Simulator
-How many ways can this puzzle be solved?
-Chipotle Race to Rewards bot
-seth everman plays toto - africa in different genres but it gets more and more out of tune over time
-how to pass every coding interview (animation)
-the jazz riff that Davie504 plays a lot
-gus johnson freestylin' in the studio (remixed)
+title,id,viewCount,likeCount,favoriteCount,commentCount,viewCount,likeCount,favoriteCount,commentCount
+"Cloudflare Deploys Really Slow Code, Takes Down Internet",DDe-S3uef2w,261681,11291,0,611,262193,11298,0,611
+How GitHub's Database Self-Destructed in 43 Seconds,dsHyUgGMht0,550323,23598,0,659,550436,23599,0,659
+The Worst Website Launch of All Time,Ui5op0N700A,149384,6827,0,317,149475,6830,0,317
+"Dev Deletes Entire Production Database, Chaos Ensues",tLdRBsuvVKc,1458366,45249,0,1844,1458696,45255,0,1844
+Capital One's $200M Cloud Data Breach,r7HV4s-4ksQ,305711,9771,0,328,305789,9772,0,328
+How This SQL Command Blew Up a Billion Dollar Company,R7VVwfh0Wpo,343033,13083,0,335,343160,13085,0,335
+How One Line of Code Almost Blew Up the Internet,GEbn3nHyKnA,1382992,39414,0,1311,1383113,39416,0,1311
+Can ChatGPT solve the world's hardest puzzles?,OFrLviyDNyw,39517,1046,0,68,39525,1046,0,68
+Real day in the life of a Twitter software engineer,2LoTBuviFGE,20275,550,0,17,20284,550,0,17
+Software Engineer Interview Simulator,SCdGhmpKcU8,13729,416,0,12,13735,416,0,12
+How many ways can this puzzle be solved?,XmnfqYPYwSw,7566,433,0,22,7566,433,0,22
+Chipotle Race to Rewards bot,uhoxAKB02GU,5811,112,0,29,5811,112,0,29
+seth everman plays toto - africa in different genres but it gets more and more out of tune over time,Wmqpd6eCmGE,6383,88,0,8,6383,88,0,8
+how to pass every coding interview (animation),7IB-TqTun7k,10198,413,0,21,10200,413,0,21
+the jazz riff that Davie504 plays a lot,s0GTd_zRgD4,2587,79,0,11,2587,79,0,11
+gus johnson freestylin' in the studio (remixed),SB9muv8U3k8,106196,7417,0,159,106199,7417,0,159
