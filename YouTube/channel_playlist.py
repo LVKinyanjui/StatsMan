@@ -79,7 +79,7 @@ uploads_playlist_id = channel_response['items'][0]['contentDetails']['relatedPla
 
 
 # Step 2: Get Video Titles from the Playlist
-video_titles = []
+video_data = []
 next_page_token = None
 
 while True:
@@ -91,7 +91,9 @@ while True:
     ).execute()
 
     for item in playlist_response['items']:
-        video_titles.append(item['snippet']['title'])
+        video_title = item['snippet']['title']
+        video_id = item['snippet']['resourceId']['videoId']
+        video_data.append({'title': video_title, 'id': video_id})
 
     next_page_token = playlist_response.get('nextPageToken')
     if not next_page_token:
@@ -103,8 +105,7 @@ while True:
 # In[11]:
 
 
-df = pd.DataFrame()
-df['video_titles'] = video_titles
+df = pd.DataFrame(video_data)
 df.to_csv(f"./data/{CHANNEL_TITLE}.csv", index=False)
 
 
