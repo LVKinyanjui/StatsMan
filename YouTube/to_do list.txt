@@ -1,1 +1,3 @@
 Get publishDate from the API
+
+Replace spaces with other delimeter eg underscores
