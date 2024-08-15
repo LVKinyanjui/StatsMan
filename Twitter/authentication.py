@@ -3,9 +3,6 @@ import os
 from requests_oauthlib import OAuth1Session
 
 
-# File to save credentials
-CREDENTIALS_FILE = "twitter_credentials.json"
-
 def authenticate():
     consumer_key = os.environ.get("TWITTER_API_KEY")
     consumer_secret = os.environ.get("TWITTER_API_KEY_SECRET")
