@@ -13,8 +13,9 @@ consumer_secret = os.environ.get("TWITTER_API_KEY_SECRET")
 # created_at, description, entities, id, location, name,
 # pinned_tweet_id, profile_image_url, protected,
 # public_metrics, url, username, verified, and withheld
-fields = "id,created_at,description,profile_image_url,verified,verified_type"
-params = {"user.fields": fields}
+fields = "created_at,description"
+params = {"usernames": "lii_karis", "user.fields": fields}
+
 
 def fetch_data(params: dict) -> dict:
     if consumer_key is None or consumer_secret is None:
@@ -51,6 +52,7 @@ def fetch_data(params: dict) -> dict:
     access_token = oauth_tokens["oauth_token"]
     access_token_secret = oauth_tokens["oauth_token_secret"]
 
+
     # Make the request
     oauth = OAuth1Session(
         consumer_key,
@@ -59,7 +61,9 @@ def fetch_data(params: dict) -> dict:
         resource_owner_secret=access_token_secret,
     )
 
-    response = oauth.get("https://api.twitter.com/2/users/me", params=params)
+    response = oauth.get(
+        "https://api.twitter.com/2/users/by", params=params
+    )
 
     if response.status_code != 200:
         raise Exception(
@@ -71,7 +75,6 @@ def fetch_data(params: dict) -> dict:
     json_response = response.json()
 
     print(json.dumps(json_response, indent=4, sort_keys=True))
-    return json_response
 
 if __name__ == '__main__':
     fetch_data(params)
