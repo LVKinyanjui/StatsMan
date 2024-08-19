@@ -5,6 +5,15 @@ import csv
 from configparser import ConfigParser
 from random import randint
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# Login credentials
+username = os.environ['X_USERNAME']
+email = os.environ['X_EMAIL']
+password = os.environ['X_PASSWORD']
 
 MINIMUM_TWEETS = 5
 QUERY = '(from:JoeBiden) lang:en until:2024-07-19 since:2018-01-01'
@@ -23,13 +32,6 @@ def get_tweets(tweets):
 
     return tweets
 
-
-#* login credentials
-config = ConfigParser()
-config.read('config.ini')
-username = config['X']['username']
-email = config['X']['email']
-password = config['X']['password']
 
 #* create a csv file
 with open('tweets.csv', 'w', newline='') as file:

@@ -1,0 +1,6 @@
+*.env
+*env
+**data/
+**secrets/
+**.csv
+../*.csv
