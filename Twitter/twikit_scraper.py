@@ -6,8 +6,8 @@ from configparser import ConfigParser
 from random import randint
 
 
-MINIMUM_TWEETS = 10
-QUERY = '(from:elonmusk) lang:en until:2020-01-01 since:2018-01-01'
+MINIMUM_TWEETS = 5
+QUERY = '(from:JoeBiden) lang:en until:2024-07-19 since:2018-01-01'
 
 
 def get_tweets(tweets):
