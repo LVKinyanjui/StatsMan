@@ -1,8 +1,9 @@
 from twikit import Client, TooManyRequests
+from twikit_login import login
 import time
 from datetime import datetime
-import csv
-from configparser import ConfigParser
+import json
+import asyncio
 from random import randint
 
 from dotenv import load_dotenv
@@ -16,14 +17,14 @@ email = os.environ['X_EMAIL']
 password = os.environ['X_PASSWORD']
 
 MINIMUM_TWEETS = 5
-QUERY = '(from:JoeBiden) lang:en until:2024-07-19 since:2018-01-01'
+QUERY = '(from:elonmusk) lang:en until:2024-07-19 since:2018-01-01'
 
 
-def get_tweets(tweets):
+async def get_tweets(tweets, client):
     if tweets is None:
         #* get tweets
         print(f'{datetime.now()} - Getting tweets...')
-        tweets = client.search_tweet(QUERY, product='Top')
+        tweets = await client.search_tweet(QUERY, product='Top')
     else:
         wait_time = randint(5, 10)
         print(f'{datetime.now()} - Getting next tweets after {wait_time} seconds ...')
@@ -33,48 +34,54 @@ def get_tweets(tweets):
     return tweets
 
 
-#* create a csv file
-with open('tweets.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['Tweet_count', 'Username', 'Text', 'Created At', 'Retweets', 'Likes'])
+async def main():
+    #* authenticate to X.com
+    #! 1) use the login credentials. 2) use cookies.
+    client = Client(language='en-US')
+    
+    login(client)
 
+    tweet_count = 0
+    tweets = None
+    tweet_data = []
 
+    while tweet_count < MINIMUM_TWEETS:
 
-#* authenticate to X.com
-#! 1) use the login credentials. 2) use cookies.
-client = Client(language='en-US')
-# client.login(auth_info_1=username, auth_info_2=email, password=password)
-# client.save_cookies('cookies.json')
+        try:
+            tweets = await get_tweets(tweets, client)
+        except TooManyRequests as e:
+            rate_limit_reset = datetime.fromtimestamp(e.rate_limit_reset)
+            print(f'{datetime.now()} - Rate limit reached. Waiting until {rate_limit_reset}')
+            wait_time = rate_limit_reset - datetime.now()
+            time.sleep(wait_time.total_seconds())
+            continue
 
-client.load_cookies('cookies.json')
+        if not tweets:
+            print(f'{datetime.now()} - No more tweets found')
+            break
 
-tweet_count = 0
-tweets = None
+        for tweet in tweets:
+            tweet_count += 1
+            tweet_data.append(
+                {
+                    "tweet_count": tweet_count, 
+                    "user_name": tweet.user.name, 
+                    "tweet_text": tweet.text, 
+                    "created_at": tweet.created_at, 
+                    "retweet_count": tweet.retweet_count, 
+                    "favourite_count": tweet.favorite_count
+                }
+            )
+            
 
-while tweet_count < MINIMUM_TWEETS:
+        print(f'{datetime.now()} - Got {tweet_count} tweets')
 
-    try:
-        tweets = get_tweets(tweets)
-    except TooManyRequests as e:
-        rate_limit_reset = datetime.fromtimestamp(e.rate_limit_reset)
-        print(f'{datetime.now()} - Rate limit reached. Waiting until {rate_limit_reset}')
-        wait_time = rate_limit_reset - datetime.now()
-        time.sleep(wait_time.total_seconds())
-        continue
+    print(f'{datetime.now()} - Done! Got {tweet_count} tweets found')
 
-    if not tweets:
-        print(f'{datetime.now()} - No more tweets found')
-        break
+    # SAVE DATA
+    with open("data/tweets.jsonl", "w", encoding="utf-8") as fp:
+        for tweet in tweet_data:
+            json.dump(tweet, fp)
 
-    for tweet in tweets:
-        tweet_count += 1
-        tweet_data = [tweet_count, tweet.user.name, tweet.text, tweet.created_at, tweet.retweet_count, tweet.favorite_count]
-        
-        with open('tweets.csv', 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(tweet_data)
-
-    print(f'{datetime.now()} - Got {tweet_count} tweets')
-
-
-print(f'{datetime.now()} - Done! Got {tweet_count} tweets found')
+if __name__ == '__main__':
+    asyncio.run(main())
