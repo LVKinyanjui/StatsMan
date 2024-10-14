@@ -7,28 +7,28 @@ class TwitterAPI:
     def __init__(self):
 
         if load_dotenv:
-            (consumer_key, ) = os.environ['TWITTER_CONSUMER_KEY'],
+            (consumer_key, ) = os.getenv('TWITTER_CONSUMER_KEY'),
             self.consumer_key = consumer_key
-            (consumer_secret, ) = os.environ['TWITTER_CONSUMER_KEY_SECRET'],
+            (consumer_secret, ) = os.getenv('TWITTER_CONSUMER_KEY_SECRET'),
             self.consumer_secret = consumer_secret
-            (access_token, ) = os.environ['TWITTER_ACCESS_TOKEN'],
+            (access_token, ) = os.getenv('TWITTER_ACCESS_TOKEN'),
             self.access_token = access_token
-            (access_secret, ) = os.environ['TWITTER_ACCESS_TOKEN_SECRET'],
+            (access_secret, ) = os.getenv('TWITTER_ACCESS_TOKEN_SECRET'),
             self.access_secret = access_secret
 
             self.client = self.twitConnection()
         else:
             raise Exception("Environmental variables not set in .env file")
-        
+
         # self.client = tweepy.Client(
         #     consumer_key = consumer_key, consumer_secret=consumer_secret,
         #     access_token=access_token, access_token_secret=access_secret)
-    
+
     def twitConnection(self):
         client = tweepy.Client(
             consumer_key = self.consumer_key, consumer_secret=self.consumer_secret,
             access_token=self.access_token, access_token_secret=self.access_secret)
-        
+
         return client
 
     def tweet_thread(self, first_tweet_text, replies):
