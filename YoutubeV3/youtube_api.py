@@ -1,15 +1,22 @@
 from googleapiclient.discovery import build
 import os
 
+from modules.exceptions import NoItemsException
+
 class YoutubeAPI:
     
-    def __init__(self, channel_username: str):
+    def __init__(self, channel_username: str, video_url: str):
         api_key = os.getenv("YOUTUBE_API_KEY")
         self.youtube = build("youtube", "v3", developerKey=api_key)
         
         # In this order
         self.username = channel_username
-        self.channel_id = self._get_channel_id_by_username()     # Trivial and necessary for all subsequent operations
+
+
+        try:
+            self.channel_id = self._get_channel_id_by_username()     # Trivial and necessary for all subsequent operations
+        except NoItemsException:
+            self.channel_id = self._get_channel_id_by_video_id()
 
         # Attributes initially set to none as changes to class structure are expectes
         # and may not be necessary to call their methods in the constructor
@@ -29,7 +36,21 @@ class YoutubeAPI:
             self.channel_id = response['items'][0]['id']
             return self
         except KeyError:
-            raise SystemExit(f"No channel found for username: {self.username} \nTry Another")
+            raise NoItemsException(f"No channel found for username: {self.username} \nTry Another")
+        
+    def _get_channel_id_by_video_id(self):
+        request = self.youtube.videos().list(
+            part="snippet",
+            id=self.video_id
+        )
+        response = request.execute()
+
+        try:
+            self.channel_id = response['items'][0]['snippet']['channelId']
+            return self
+        except KeyError:
+            raise NoItemsException(f"No video found for video ID: {self.video_id}")
+
 
     def get_uploads_playlist_id(self):
         request = self.youtube.channels().list(
@@ -38,6 +59,9 @@ class YoutubeAPI:
         )
         response = request.execute()
 
+        if response["pageInfo"]["totalResults"] == 0:
+            raise Exception(f"No results returned from endpoint: {request.methodId}")
+        
         self.uploads_playlist_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
         return self
     
