@@ -1,22 +1,23 @@
 from googleapiclient.discovery import build
 import os
 
-from modules.exceptions import NoItemsException
+from modules.exceptions import NoItemsReturned
+from modules.utils import extract_video_id
 
 class YoutubeAPI:
     
-    def __init__(self, channel_username: str, video_url: str):
+    def __init__(self, channel_username: str = None, video_url: str = None):
         api_key = os.getenv("YOUTUBE_API_KEY")
         self.youtube = build("youtube", "v3", developerKey=api_key)
         
-        # In this order
-        self.username = channel_username
+        self.video_id = self.video_id = extract_video_id(video_url)
 
-
-        try:
-            self.channel_id = self._get_channel_id_by_username()     # Trivial and necessary for all subsequent operations
-        except NoItemsException:
+        if video_url is not None:
             self.channel_id = self._get_channel_id_by_video_id()
+
+        if channel_username is not None:
+            self.username = channel_username
+            self.channel_id = self._get_channel_id_by_username()     # Trivial and necessary for all subsequent operations
 
         # Attributes initially set to none as changes to class structure are expectes
         # and may not be necessary to call their methods in the constructor
@@ -36,7 +37,7 @@ class YoutubeAPI:
             self.channel_id = response['items'][0]['id']
             return self
         except KeyError:
-            raise NoItemsException(f"No channel found for username: {self.username} \nTry Another")
+            raise NoItemsReturned(f"No channel found for username: {self.username} \nTry Another")
         
     def _get_channel_id_by_video_id(self):
         request = self.youtube.videos().list(
@@ -49,7 +50,7 @@ class YoutubeAPI:
             self.channel_id = response['items'][0]['snippet']['channelId']
             return self
         except KeyError:
-            raise NoItemsException(f"No video found for video ID: {self.video_id}")
+            raise NoItemsReturned(f"No video found for video ID: {self.video_id}")
 
 
     def get_uploads_playlist_id(self):
@@ -115,8 +116,7 @@ class YoutubeAPI:
 
 if __name__ == "__main__":
     # Execute in order
-    username = "GoogleDevelopers"
-    api = YoutubeAPI(username)
+    api = YoutubeAPI(video_url="https://www.youtube.com/watch?v=vum0-y47cvw")
     api.get_uploads_playlist_id()
     api.get_video_ids_from_playlist()
     api.get_video_stats()
