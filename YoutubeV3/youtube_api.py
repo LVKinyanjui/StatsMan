@@ -34,8 +34,7 @@ class YoutubeAPI:
         response = request.execute()
 
         try:
-            self.channel_id = response['items'][0]['id']
-            return self
+            return response['items'][0]['id']
         except KeyError:
             raise NoItemsReturned(f"No channel found for username: {self.username} \nTry Another")
         
@@ -47,8 +46,7 @@ class YoutubeAPI:
         response = request.execute()
 
         try:
-            self.channel_id = response['items'][0]['snippet']['channelId']
-            return self
+            return response['items'][0]['snippet']['channelId']
         except KeyError:
             raise NoItemsReturned(f"No video found for video ID: {self.video_id}")
 
@@ -61,12 +59,12 @@ class YoutubeAPI:
         response = request.execute()
 
         if response["pageInfo"]["totalResults"] == 0:
-            raise Exception(f"No results returned from endpoint: {request.methodId}")
+            raise NoItemsReturned(f"No results returned from endpoint: {request.methodId}")
         
         self.uploads_playlist_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-        return self
+        return self.uploads_playlist_id
     
-    def get_video_ids_from_playlist(self) -> list:
+    def get_video_ids_from_playlist(self, max_results=5) -> list:
         video_ids = []
         next_page_token = None
 
@@ -75,7 +73,7 @@ class YoutubeAPI:
             request = self.youtube.playlistItems().list(
                 part="snippet",
                 playlistId=self.uploads_playlist_id,
-                maxResults=50,
+                maxResults=max_results,
                 pageToken=next_page_token
             )
             response = request.execute()
@@ -89,13 +87,13 @@ class YoutubeAPI:
                 break
 
         self.video_ids = video_ids
-        return self
+        return self.video_ids
 
     def get_video_stats(self):
         video_stats = []
         for i in range(0, len(self.video_ids), 50):  # YouTube API accepts up to 50 video IDs per request
             request = self.youtube.videos().list(
-                part="statistics,contentDetails",
+                part="statistics,contentDetails,snippet",
                 id=','.join(self.video_ids[i:i+50])
             )
             response = request.execute()
@@ -106,12 +104,14 @@ class YoutubeAPI:
                     'viewCount': item['statistics'].get('viewCount', 0),
                     'likeCount': item['statistics'].get('likeCount', 0),
                     'commentCount': item['statistics'].get('commentCount', 0),
-                    'duration': item['contentDetails']['duration']
+                    'duration': item['contentDetails']['duration'],
+                    'videoTitle': item['snippet']['title'],
+                    'publishedAt': item['snippet']['publishedAt'],
                 }
                 video_stats.append(stats)
 
         self.video_stats = video_stats
-        return self
+        return self.video_stats
 
 
 if __name__ == "__main__":
