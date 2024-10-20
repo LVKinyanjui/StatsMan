@@ -6,6 +6,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+import plotly.express as px
+
 st.write("### Youtube Video Stats Viewer 📺")
 
 @st.cache_data
@@ -26,11 +28,15 @@ def create_plot(data: list):
     df['commentCount'] = pd.to_numeric(df.commentCount)
 
     df.set_index('publishedAt', inplace=True)
+    
+    # TODO Add a parameter to chose between seaborn or plotly chart
+    # fig, ax = plt.subplots()
+    # sns.lineplot(data=df, ax=ax)
+    # plt.xticks(rotation=90)
+    # plt.show()
 
-    fig, ax = plt.subplots()
-    sns.lineplot(data=df, ax=ax)
-    plt.xticks(rotation=90)
-    plt.show()
+    # TODO Attach youtube video title to chart so it shows that on hover
+    fig = px.line(df, x=df.index, y='viewCount')
 
     return fig
 
@@ -38,6 +44,10 @@ channel_description = st.text_input("Enter any video url from your chosen channe
 if channel_description:
     stats = query_api(channel_description)
     fig = create_plot(stats)
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
+    # st.pyplot(fig)
+
+    # TODO Deploy app
+    #    Requires a public repo
 
