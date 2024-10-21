@@ -7,6 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 import plotly.express as px
+import plotly.graph_objects as go
 
 st.write("### Youtube Video Stats Viewer 📺")
 
@@ -36,7 +37,18 @@ def create_plot(data: list):
     # plt.show()
 
     # TODO Attach youtube video title to chart so it shows that on hover
-    fig = px.line(df, x=df.index, y='viewCount')
+    # fig = px.line(df, x=df.index, y='viewCount')
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df['viewCount'],
+                            mode="lines",
+                            name="viewCount"))
+    fig.add_trace(go.Scatter(x=df.index, y=df['likeCount'],
+                                mode="lines",
+                                name="likeCount"))
+    fig.add_trace(go.Scatter(x=df.index, y=df['commentCount'],
+                            mode="lines",
+                            name="commentCount"))
 
     return fig
 
