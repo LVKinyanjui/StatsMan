@@ -41,8 +41,15 @@ def create_plot(data: list):
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['viewCount'],
-                            mode="lines",
-                            name="viewCount"))
+                            mode="lines+markers",
+                            name="viewCount",
+                            customdata=df[['videoTitle', 'videoId']],
+                            hovertemplate=
+                            '<b>publishedAt</b>: %{x}<br>' +
+                            '<b>viewCount</b>: %{y:.2f}<br>' +
+                            '<b>videoTitle</b>: %{customdata[0]}<br>' +
+                            '<b>videoId</b>: %{customdata[1]}' +
+                            '<extra></extra>',))
     fig.add_trace(go.Scatter(x=df.index, y=df['likeCount'],
                                 mode="lines",
                                 name="likeCount"))
