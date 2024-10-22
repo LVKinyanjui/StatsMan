@@ -2,13 +2,10 @@ from googleapiclient.discovery import build
 import asyncio
 import os
 
-
 from modules.exceptions import NoItemsReturned
 from modules.utils import extract_video_id
-from modules.async_functions import (
-    aget_video_ids_from_playlist,
-    aget_video_stats
-)
+from modules.async_functions import aget_video_stats
+from modules.async_functions2 import aget_video_ids_from_playlist
 
 class YoutubeAPI:
     
@@ -71,28 +68,29 @@ class YoutubeAPI:
         return self.uploads_playlist_id
     
     def get_video_ids_from_playlist(self, max_results=50) -> list:
-        video_ids = []
-        next_page_token = None
+        # video_ids = []
+        # next_page_token = None
 
-        # TODO: Perfom each request asynchronously to reduce wait times
-        while True:
-            request = self.youtube.playlistItems().list(
-                part="snippet",
-                playlistId=self.uploads_playlist_id,
-                maxResults=max_results,
-                pageToken=next_page_token
-            )
-            response = request.execute()
+        # # TODO: Perfom each request asynchronously to reduce wait times
+        # while True:
+        #     request = self.youtube.playlistItems().list(
+        #         part="snippet",
+        #         playlistId=self.uploads_playlist_id,
+        #         maxResults=max_results,
+        #         pageToken=next_page_token
+        #     )
+        #     response = request.execute()
 
-            for item in response['items']:
-                video_id = item['snippet']['resourceId']['videoId']
-                video_ids.append(video_id)
+        #     for item in response['items']:
+        #         video_id = item['snippet']['resourceId']['videoId']
+        #         video_ids.append(video_id)
 
-            next_page_token = response.get('nextPageToken')
-            if not next_page_token:
-                break
+        #     next_page_token = response.get('nextPageToken')
+        #     if not next_page_token:
+        #         break
 
-        self.video_ids = video_ids
+        # self.video_ids = video_ids
+        self.video_ids = asyncio.run(aget_video_ids_from_playlist(self.uploads_playlist_id))
         return self.video_ids
 
     def get_video_stats(self):
