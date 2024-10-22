@@ -1,8 +1,11 @@
 from googleapiclient.discovery import build
+import asyncio
 import os
+
 
 from modules.exceptions import NoItemsReturned
 from modules.utils import extract_video_id
+from modules.async_functions import aget_video_stats
 
 class YoutubeAPI:
     
@@ -64,7 +67,7 @@ class YoutubeAPI:
         self.uploads_playlist_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
         return self.uploads_playlist_id
     
-    def get_video_ids_from_playlist(self, max_results=5) -> list:
+    def get_video_ids_from_playlist(self, max_results=50) -> list:
         video_ids = []
         next_page_token = None
 
@@ -90,25 +93,27 @@ class YoutubeAPI:
         return self.video_ids
 
     def get_video_stats(self):
-        video_stats = []
-        for i in range(0, len(self.video_ids), 50):  # YouTube API accepts up to 50 video IDs per request
-            request = self.youtube.videos().list(
-                part="statistics,contentDetails,snippet",
-                id=','.join(self.video_ids[i:i+50])
-            )
-            response = request.execute()
+        # video_stats = []
+        # for i in range(0, len(self.video_ids), 50):  # YouTube API accepts up to 50 video IDs per request
+        #     request = self.youtube.videos().list(
+        #         part="statistics,contentDetails,snippet",
+        #         id=','.join(self.video_ids[i:i+50])
+        #     )
+        #     response = request.execute()
 
-            for item in response['items']:
-                stats = {
-                    'videoId': item['id'],
-                    'viewCount': item['statistics'].get('viewCount', 0),
-                    'likeCount': item['statistics'].get('likeCount', 0),
-                    'commentCount': item['statistics'].get('commentCount', 0),
-                    'duration': item['contentDetails']['duration'],
-                    'videoTitle': item['snippet']['title'],
-                    'publishedAt': item['snippet']['publishedAt'],
-                }
-                video_stats.append(stats)
+        #     for item in response['items']:
+        #         stats = {
+        #             'videoId': item['id'],
+        #             'viewCount': item['statistics'].get('viewCount', 0),
+        #             'likeCount': item['statistics'].get('likeCount', 0),
+        #             'commentCount': item['statistics'].get('commentCount', 0),
+        #             'duration': item['contentDetails']['duration'],
+        #             'videoTitle': item['snippet']['title'],
+        #             'publishedAt': item['snippet']['publishedAt'],
+        #         }
+        #         video_stats.append(stats)
+
+        video_stats = asyncio.run(aget_video_stats(self.video_ids))
 
         self.video_stats = video_stats
         return self.video_stats
