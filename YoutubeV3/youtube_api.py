@@ -5,7 +5,10 @@ import os
 
 from modules.exceptions import NoItemsReturned
 from modules.utils import extract_video_id
-from modules.async_functions import aget_video_stats
+from modules.async_functions import (
+    aget_video_ids_from_playlist,
+    aget_video_stats
+)
 
 class YoutubeAPI:
     
