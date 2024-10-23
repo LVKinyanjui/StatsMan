@@ -31,17 +31,26 @@ class YoutubeAPI:
         self.video_stats = None
 
     def _get_channel_id_by_username(self):
-        request = self.youtube.channels().list(
-            part="id",
-            forUsername=self.username
+        url = (
+            f"https://www.googleapis.com/youtube/v3/channels"
+            f"?part=id"
+            f"&forUsername={self.username}"
+            f"&key={self.api_key}"
         )
-        response = request.execute()
 
-        try:
-            return response['items'][0]['id']
-        except KeyError:
-            raise NoItemsReturned(f"No channel found for username: {self.username} \nTry Another")
+        response = requests.get(url)
+
+        if response.status_code != 200:
+            raise ConnectionError(f"Error: {response.status_code}, {response.text}")
         
+        data = response.json()
+        
+        if not ('items' in data and len(data['items']) > 0):
+            raise NoItemsReturned(f"No channel found for username: {self.username}")
+            
+        return data['items'][0]['id']
+
+            
     def _get_channel_id_by_video_id(self):
         url = (
             f"https://www.googleapis.com/youtube/v3/videos"
@@ -84,55 +93,11 @@ class YoutubeAPI:
         return self.uploads_playlist_id
 
     def get_video_ids_from_playlist(self, max_results=50) -> list:
-        # video_ids = []
-        # next_page_token = None
-
-        # # TODO: Perfom each request asynchronously to reduce wait times
-        # while True:
-        #     request = self.youtube.playlistItems().list(
-        #         part="snippet",
-        #         playlistId=self.uploads_playlist_id,
-        #         maxResults=max_results,
-        #         pageToken=next_page_token
-        #     )
-        #     response = request.execute()
-
-        #     for item in response['items']:
-        #         video_id = item['snippet']['resourceId']['videoId']
-        #         video_ids.append(video_id)
-
-        #     next_page_token = response.get('nextPageToken')
-        #     if not next_page_token:
-        #         break
-
-        # self.video_ids = video_ids
         self.video_ids = asyncio.run(aget_video_ids_from_playlist(self.uploads_playlist_id))
         return self.video_ids
 
     def get_video_stats(self):
-        # video_stats = []
-        # for i in range(0, len(self.video_ids), 50):  # YouTube API accepts up to 50 video IDs per request
-        #     request = self.youtube.videos().list(
-        #         part="statistics,contentDetails,snippet",
-        #         id=','.join(self.video_ids[i:i+50])
-        #     )
-        #     response = request.execute()
-
-        #     for item in response['items']:
-        #         stats = {
-        #             'videoId': item['id'],
-        #             'viewCount': item['statistics'].get('viewCount', 0),
-        #             'likeCount': item['statistics'].get('likeCount', 0),
-        #             'commentCount': item['statistics'].get('commentCount', 0),
-        #             'duration': item['contentDetails']['duration'],
-        #             'videoTitle': item['snippet']['title'],
-        #             'publishedAt': item['snippet']['publishedAt'],
-        #         }
-        #         video_stats.append(stats)
-
-        video_stats = asyncio.run(aget_video_stats(self.video_ids))
-
-        self.video_stats = video_stats
+        self.video_stats = asyncio.run(aget_video_stats(self.video_ids))
         return self.video_stats
 
 
