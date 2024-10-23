@@ -52,17 +52,15 @@ class YoutubeAPI:
         
         response = requests.get(url)
         
-        if response.status_code == 200:
-            data = response.json()
-            
-            if 'items' in data and len(data['items']) > 0:
-                return data['items'][0]['snippet']['channelId']
-            else:
-                print(f"No video found for video ID: {self.video_id}")
-                return None
-        else:
-            print(f"Error: {response.status_code}, {response.text}")
-            return None
+        if response.status_code != 200:
+            raise ConnectionError(f"Error: {response.status_code}, {response.text}")
+        
+        data = response.json()
+        
+        if not ('items' in data and len(data['items']) > 0):
+            raise NoItemsReturned(f"No video found for video ID: {self.video_id}")
+        
+        return data['items'][0]['snippet']['channelId']
 
     def get_uploads_playlist_id(self):
         url = (
@@ -74,20 +72,17 @@ class YoutubeAPI:
         
         response = requests.get(url)
         
-        if response.status_code == 200:
-            data = response.json()
-            
-            if 'items' in data and len(data['items']) > 0:
-                self.uploads_playlist_id = data['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-                return self.uploads_playlist_id
-            else:
-                print(f"No channel found for channel ID: {self.channel_id}")
-                return None
-        else:
-            print(f"Error: {response.status_code}, {response.text}")
-            return None
+        if response.status_code != 200:
+            raise ConnectionError(f"Error: {response.status_code}, {response.text}")
 
-    
+        data = response.json()
+        
+        if not ('items' in data and len(data['items']) > 0):
+            raise NoItemsReturned(f"No channel found for channel ID: {self.channel_id}")
+        
+        self.uploads_playlist_id = data['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+        return self.uploads_playlist_id
+
     def get_video_ids_from_playlist(self, max_results=50) -> list:
         # video_ids = []
         # next_page_token = None
