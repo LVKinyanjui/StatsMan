@@ -65,6 +65,8 @@ if channel_description:
     fig = create_plot(stats)
     st.plotly_chart(fig)
 
+    stats
+
     # st.pyplot(fig)
 
     # TODO Deploy app

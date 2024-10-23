@@ -1,5 +1,6 @@
 from googleapiclient.discovery import build
 import asyncio
+import requests
 import os
 
 from modules.exceptions import NoItemsReturned
@@ -10,8 +11,8 @@ from modules.async_functions2 import aget_video_ids_from_playlist
 class YoutubeAPI:
     
     def __init__(self, channel_username: str = None, video_url: str = None):
-        api_key = os.getenv("YOUTUBE_API_KEY")
-        self.youtube = build("youtube", "v3", developerKey=api_key)
+        self.api_key = os.getenv("YOUTUBE_API_KEY")
+        # self.youtube = build("youtube", "v3", developerKey=self.api_key)
         
         self.video_id = self.video_id = extract_video_id(video_url)
 
@@ -42,30 +43,50 @@ class YoutubeAPI:
             raise NoItemsReturned(f"No channel found for username: {self.username} \nTry Another")
         
     def _get_channel_id_by_video_id(self):
-        request = self.youtube.videos().list(
-            part="snippet",
-            id=self.video_id
+        url = (
+            f"https://www.googleapis.com/youtube/v3/videos"
+            f"?part=snippet"
+            f"&id={self.video_id}"
+            f"&key={self.api_key}"
         )
-        response = request.execute()
-
-        try:
-            return response['items'][0]['snippet']['channelId']
-        except KeyError:
-            raise NoItemsReturned(f"No video found for video ID: {self.video_id}")
-
+        
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            if 'items' in data and len(data['items']) > 0:
+                return data['items'][0]['snippet']['channelId']
+            else:
+                print(f"No video found for video ID: {self.video_id}")
+                return None
+        else:
+            print(f"Error: {response.status_code}, {response.text}")
+            return None
 
     def get_uploads_playlist_id(self):
-        request = self.youtube.channels().list(
-            part="contentDetails",
-            id=self.channel_id
+        url = (
+            f"https://www.googleapis.com/youtube/v3/channels"
+            f"?part=contentDetails"
+            f"&id={self.channel_id}"
+            f"&key={self.api_key}"
         )
-        response = request.execute()
-
-        if response["pageInfo"]["totalResults"] == 0:
-            raise NoItemsReturned(f"No results returned from endpoint: {request.methodId}")
         
-        self.uploads_playlist_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-        return self.uploads_playlist_id
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            if 'items' in data and len(data['items']) > 0:
+                self.uploads_playlist_id = data['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+                return self.uploads_playlist_id
+            else:
+                print(f"No channel found for channel ID: {self.channel_id}")
+                return None
+        else:
+            print(f"Error: {response.status_code}, {response.text}")
+            return None
+
     
     def get_video_ids_from_playlist(self, max_results=50) -> list:
         # video_ids = []
